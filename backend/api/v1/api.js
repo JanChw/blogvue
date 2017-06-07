@@ -13,9 +13,10 @@ api.route('/blogs/:id')
 
 api.post('/users/register',UsersController.register);
 api.patch('/users/:id',UsersController.updateUser);
+api.get('/users/:id/blogs',UsersController.getAllBlogs)
 
-api.post('/admin/login',UsersController.login);
-api.get('/admin/logout',UsersController.logout);
+api.post(['/admin/login','/users/login'],UsersController.login);
+api.get(['/admin/logout','/users/logout'],UsersController.logout);
 
 module.exports = api;
    

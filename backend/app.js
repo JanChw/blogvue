@@ -5,6 +5,7 @@ const cookie = require('cookie-parser');
 const session = require('express-session');
 const bodyParser = require('body-parser');
 const api = require('./api/v1/api');
+const tools = require('./middlewares/tools');
 
 const app = express();
 
@@ -17,7 +18,7 @@ app.use(session({
   resave:false,
   saveUninitialized:false
 }));
-
+app.use(tools);
 app.use(api);
 
 app.use((err,req,res,next)=>{
