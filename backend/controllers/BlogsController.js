@@ -1,4 +1,5 @@
 const Blog = require('../models/Blog');
+const User = require('../models/User');
 
 
 // let idIsValid = (req) => mongoose.Types.ObjectId.isValid(req.params.id);
@@ -25,7 +26,11 @@ module.exports = {
     //   next(err)
     // }
     res.wrap(async () => {
+      Object.assign(req.body,{author:req.session.userId});
       let blog = await Blog.create(req.body);
+      let user = await User.findById(req.session.userId).populate('posts');
+        user.posts.push(blog._id);
+        await  user.save();
       res.json(blog);
     });
   },
@@ -40,7 +45,7 @@ module.exports = {
       //   next(err);
       // }
      return res.wrap(async () => {
-        let blog = await Blog.findById(req.params.id);
+        let blog = await Blog.findById(req.params.id).populate('author');
         res.json(blog);
       });
     }
@@ -75,6 +80,10 @@ module.exports = {
       // }
       return res.wrap(async () => {
         let blog = await Blog.findByIdAndRemove(req.params.id);
+        let user = await User.findById(req.session.userId).populate('posts');
+        let posts = user.posts;
+        posts.splice(posts.indexOf(blog._id),1);
+        await user.save();
         res.json(blog);
       });
     }

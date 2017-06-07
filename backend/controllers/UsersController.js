@@ -39,18 +39,20 @@ module.exports = {
     // } catch (err) {
     //   next(err);
     // }
-    return res.wrap(async () => {
+    res.wrap(async () => {
       let user = await User.findOne(req.body);
       if (user) {
         req.session.userId = user._id;
+        req.session.currentUser = user;
         console.log(req);
-        res.json({ user: user })
+       return  res.json({ user: user })
       }
       next(new Error('用户名或密码不正确'));
     });
   },
   logout(req, res) {
     delete req.session.userId;
+    delete req.session.currentUser;
     console.log(req.session);
     res.json({ user: null });
   },
