@@ -6,6 +6,7 @@ const session = require('express-session');
 const bodyParser = require('body-parser');
 const api = require('./api/v1/api');
 const tools = require('./middlewares/tools');
+const isObjectId = require('./middlewares/isObjectId');
 
 const app = express();
 
@@ -19,6 +20,8 @@ app.use(session({
   saveUninitialized:false
 }));
 app.use(tools);
+// app.use("*/:id",isObjectId);
+
 app.use(api);
 
 app.use((err,req,res,next)=>{
@@ -26,5 +29,6 @@ app.use((err,req,res,next)=>{
   res.status(500).send('something broke!');
 })
 app.listen(3000,()=>{
+  console.log(app.param);
   console.log('server starting on port 3000')
 });
