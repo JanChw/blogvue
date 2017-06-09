@@ -7,6 +7,8 @@ let UserSchema = {
   password:String,
   isAdmin:{type:Boolean,default:false},
   isActived:{type:Boolean,default:false},
+  activeExpires:{type:Date,default:(Date.now()+12*60*60*1000)},
+  activeToken:String,
   posts:[{type:Schema.Types.ObjectId,ref:'Blog'}],
   meta:{
     type:Schema.Types.Mixed,
