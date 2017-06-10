@@ -9,14 +9,14 @@ module.exports = {
     //   next(err);
     // }
     res.wrap(async () => {
-      let activeToken = await res.hash();
-      Object.assign(req.body, { activeToken })
+      let token = await res.hash();
+      Object.assign(req.body, { token })
       let user = await User.create(req.body);
-      sendMail(user);
+      sendMail(user,'active');
       res.json(user);
     });
   },
-  async updateUser(req, res, next) {
+  async forgetPassword(req, res, next) {
     // try {
     //   let user = await User.findByIdAndUpdate(req.params.id, req.body);
     //   res.json(user);
@@ -24,10 +24,29 @@ module.exports = {
     //   next(err)
     // }
     res.wrap(async () => {
-      let user = await User.findByIdAndUpdate(req.params.id, req.body);
-      res.json(user);
+      let token = await res.hash();
+      let user = await User.findOne({email:req.body.email});
+      if(!user){
+        return res.json({msg:'该邮箱未注册！'});
+      }
+      user.token = token;
+      sendMail(user,'resetPwd');
+      let result = await user.save();
+      
+      res.json(result);
     });
 
+  },
+  
+  async resetPassword(req,res,next){
+    res.wrap(async () => {
+      let token = encodeURIComponent(req.params.token);
+      let user = await User.findOne({token});
+      
+      user.password = req.body.password;
+      await user.save();
+      res.json({msg:'密码修改成功！'});
+    });
   },
   async login(req, res, next) {
     // try {
@@ -43,12 +62,9 @@ module.exports = {
     // }
     res.wrap(async () => {
       let user = await User.findOne(req.body);
-      if (user) {
         req.session.userId = user._id;
         req.session.currentUser = user;
         return res.json({ user: user })
-      }
-      next(new Error('用户名或密码不正确'));
     });
   },
   logout(req, res) {
@@ -72,25 +88,12 @@ module.exports = {
 
   },
   async activeUser(req, res, next) {
-    console.log(req.params.activeToken);
-    let user = await User.findOne({ activeToken: encodeURIComponent(req.params.activeToken) });
-    console.log(user);
-
-    if (!user) {
-      return res.json({ msg: '链接非法！' });
-    }
-
-    if (Date.parse(user.activeExpires) - Date.now() < 0) {
-      sendMail(user);
-      user.activeExpires = Date.now() + 12 * 60 * 60 * 1000;
-      await user.save();
-      return res.json({ msg: '请您再到注册邮箱激活账号！' })
-    }
+    let token = encodeURIComponent(req.params.token);
+    let user = await User.findOne({ token });
 
     user.isActived = true;
     await user.save();
     res.json({msg:'账号已激活'})
-    next();
   }
 
 }

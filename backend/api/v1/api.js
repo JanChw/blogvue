@@ -4,10 +4,13 @@ const actionsAuth = require('../../middlewares/action-auth');
 const isOwnerOrAdmin = require('../../middlewares/isOwnerOrAdmin');
 const isObjectId = require('../../middlewares/isObjectId');
 const isActived = require('../../middlewares/isActived');
+const isRegisted = require('../../middlewares/isRegisted');
+const isLegalToken = require('../../middlewares/isLegalToken');
 
 const api = require('express').Router();
 
 api.param('id',isObjectId);
+api.param('token',isLegalToken);
 
 api.use(['/blogs'],actionsAuth);
 
@@ -22,13 +25,14 @@ api.route('/blogs/:id')
    .delete(BlogsController.removeBlog);
 
 api.post('/users/register',UsersController.register);
-api.patch('/users/:id',UsersController.updateUser);
 api.get('/users/:id/blogs',UsersController.getAllBlogs)
 
-api.post(['/admin/login','/users/login'],isActived,UsersController.login);
+api.post(['/admin/login','/users/login'],isRegisted,isActived,UsersController.login);
 api.get(['/admin/logout','/users/logout'],UsersController.logout);
 
-api.get('/account/active/:activeToken',UsersController.activeUser);
+api.get('/account/active/:token',UsersController.activeUser);
+api.patch('/account/forgetPwd',UsersController.forgetPassword);
+api.patch('/account/resetPwd/:token', UsersController.resetPassword);
 
 
 module.exports = api;

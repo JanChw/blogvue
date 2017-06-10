@@ -6,5 +6,5 @@ module.exports = (req,res,next) => {
     return res.json({msg:'请先登录！'});
   }
 
-  next()
+  next();
 }
