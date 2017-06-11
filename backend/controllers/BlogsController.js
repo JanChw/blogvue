@@ -27,6 +27,7 @@ module.exports = {
     // }
     res.wrap(async () => {
       Object.assign(req.body,{author:req.session.userId});
+      console.log(req.body);
       let blog = await Blog.create(req.body);
       let user = await User.findById(req.session.userId).populate('posts');
         user.posts.push(blog._id);

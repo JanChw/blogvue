@@ -62,9 +62,10 @@ module.exports = {
     // }
     res.wrap(async () => {
       let user = await User.findOne(req.body);
+      
         req.session.userId = user._id;
         req.session.currentUser = user;
-        return res.json({ user: user })
+        return res.status(200).json({ msg:'成功登陆！'});
     });
   },
   logout(req, res) {
